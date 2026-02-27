@@ -1,0 +1,454 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap');
+
+/* ═══════════════════════════════════════════
+   DAEMONWEAVE — CRT / Cyberpunk Theme
+   Inspired by Project Frankenstein WebUI
+   ═══════════════════════════════════════════ */
+
+:root {
+  --bg-deep: #0a0a0a;
+  --bg-surface: #0d1117;
+  --bg-elevated: #141820;
+  --text-primary: #c8d6e5;
+  --text-dim: #4a5568;
+  --neon-green: #00FF41;
+  --neon-cyan: #00fff9;
+  --scanline-opacity: 0.03;
+  --glow-strength: 0.6;
+}
+
+/* ── Base ── */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  font-family: 'JetBrains Mono', monospace;
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-deep);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1a2030;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--neon-green);
+  box-shadow: 0 0 6px var(--neon-green);
+}
+
+/* ── Selection ── */
+::selection {
+  background: #00FF4130;
+  color: #00FF41;
+}
+
+/* ═══════════════════════════════════════════
+   CRT SCANLINES OVERLAY
+   ═══════════════════════════════════════════ */
+.crt-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 9999;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 255, 65, var(--scanline-opacity)) 2px,
+    rgba(0, 255, 65, var(--scanline-opacity)) 4px
+  );
+}
+
+.crt-overlay::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 60%,
+    rgba(0, 0, 0, 0.3) 100%
+  );
+}
+
+/* ── Phosphor Glow Classes ── */
+.phosphor-glow {
+  text-shadow: 0 0 4px currentColor, 0 0 8px currentColor;
+}
+
+.phosphor-glow-green {
+  color: #00FF41;
+  text-shadow: 0 0 4px #00FF41, 0 0 10px #00FF4180, 0 0 20px #00FF4130;
+}
+
+.phosphor-glow-cyan {
+  color: #00fff9;
+  text-shadow: 0 0 4px #00fff9, 0 0 10px #00fff980, 0 0 20px #00fff930;
+}
+
+/* ═══════════════════════════════════════════
+   COMPONENT STYLES
+   ═══════════════════════════════════════════ */
+
+/* ── Neon Border Card ── */
+.card-surface {
+  background: var(--bg-surface);
+  border: 1px solid #1a2030;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.card-surface:hover {
+  border-color: #00FF4130;
+  box-shadow: 0 0 15px #00FF4108, inset 0 0 15px #00FF4105;
+}
+
+.card-elevated {
+  background: var(--bg-elevated);
+  border: 1px solid #1e2636;
+  border-radius: 4px;
+}
+
+/* ── Entity-colored borders ── */
+.entity-border-kairos {
+  border-left: 3px solid #FFD900;
+}
+
+.entity-border-hibbert {
+  border-left: 3px solid #00ff88;
+}
+
+.entity-border-atlas {
+  border-left: 3px solid #00B3FF;
+}
+
+.entity-border-echo {
+  border-left: 3px solid #FF8000;
+}
+
+.entity-border-commons {
+  border-left: 3px solid #00FF41;
+}
+
+/* ── Glow Buttons ── */
+.btn-neon {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1.25rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #00FF41;
+  background: transparent;
+  border: 1px solid #00FF4140;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-neon:hover {
+  background: #00FF4110;
+  border-color: #00FF41;
+  box-shadow: 0 0 10px #00FF4130, 0 0 20px #00FF4110;
+  text-shadow: 0 0 4px #00FF41;
+}
+
+.btn-neon:active {
+  transform: scale(0.98);
+}
+
+.btn-neon-fill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1.25rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #0a0a0a;
+  background: #00FF41;
+  border: 1px solid #00FF41;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 600;
+}
+
+.btn-neon-fill:hover {
+  box-shadow: 0 0 15px #00FF4150, 0 0 30px #00FF4120;
+}
+
+/* ── Input Fields ── */
+.input-terminal {
+  width: 100%;
+  padding: 0.625rem 0.875rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  background: var(--bg-deep);
+  border: 1px solid #1a2030;
+  border-radius: 2px;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.input-terminal:focus {
+  border-color: #00FF4160;
+  box-shadow: 0 0 8px #00FF4115;
+}
+
+.input-terminal::placeholder {
+  color: var(--text-dim);
+}
+
+/* ── Markdown Content ── */
+.markdown-content h1,
+.markdown-content h2,
+.markdown-content h3,
+.markdown-content h4 {
+  color: #00fff9;
+  font-weight: 600;
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+}
+
+.markdown-content h1 { font-size: 1.4rem; }
+.markdown-content h2 { font-size: 1.2rem; }
+.markdown-content h3 { font-size: 1.05rem; }
+
+.markdown-content p {
+  margin-bottom: 0.8em;
+  line-height: 1.7;
+}
+
+.markdown-content a {
+  color: #00fff9;
+  text-decoration: none;
+  border-bottom: 1px solid #00fff940;
+  transition: all 0.2s;
+}
+
+.markdown-content a:hover {
+  color: #00FF41;
+  border-bottom-color: #00FF41;
+  text-shadow: 0 0 4px #00FF4180;
+}
+
+.markdown-content code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85em;
+  padding: 0.15em 0.4em;
+  background: #141820;
+  border: 1px solid #1e2636;
+  border-radius: 3px;
+  color: #00FF41;
+}
+
+.markdown-content pre {
+  background: #0a0a0a;
+  border: 1px solid #1a2030;
+  border-radius: 4px;
+  padding: 1rem;
+  overflow-x: auto;
+  margin: 1em 0;
+}
+
+.markdown-content pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+.markdown-content blockquote {
+  border-left: 3px solid #00FF4140;
+  padding-left: 1em;
+  margin: 1em 0;
+  color: var(--text-dim);
+  font-style: italic;
+}
+
+.markdown-content ul,
+.markdown-content ol {
+  margin: 0.5em 0;
+  padding-left: 1.5em;
+}
+
+.markdown-content li {
+  margin-bottom: 0.25em;
+}
+
+.markdown-content li::marker {
+  color: #00FF41;
+}
+
+.markdown-content hr {
+  border: none;
+  border-top: 1px solid #1a2030;
+  margin: 1.5em 0;
+}
+
+.markdown-content img {
+  max-width: 100%;
+  border-radius: 4px;
+  border: 1px solid #1a2030;
+}
+
+.markdown-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1em 0;
+}
+
+.markdown-content th,
+.markdown-content td {
+  padding: 0.5em 0.75em;
+  border: 1px solid #1a2030;
+  text-align: left;
+}
+
+.markdown-content th {
+  background: var(--bg-elevated);
+  color: #00fff9;
+  font-weight: 600;
+}
+
+/* ── Reaction Emojis ── */
+.reaction-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.75rem;
+  background: var(--bg-elevated);
+  border: 1px solid #1e2636;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+  color: var(--text-dim);
+}
+
+.reaction-btn:hover {
+  border-color: #00FF4140;
+  color: var(--text-primary);
+}
+
+.reaction-btn.active {
+  border-color: #00FF4160;
+  background: #00FF4110;
+  color: #00FF41;
+}
+
+/* ── Badge / Role Tags ── */
+.badge-admin {
+  display: inline-block;
+  padding: 0.1rem 0.4rem;
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #ff3333;
+  border: 1px solid #ff333340;
+  border-radius: 2px;
+  background: #ff333310;
+}
+
+.badge-mod {
+  display: inline-block;
+  padding: 0.1rem 0.4rem;
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #FFD900;
+  border: 1px solid #FFD90040;
+  border-radius: 2px;
+  background: #FFD90010;
+}
+
+/* ── Terminal Cursor Blink ── */
+.cursor-blink::after {
+  content: '█';
+  animation: blink 1s step-end infinite;
+  color: #00FF41;
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
+/* ── Category Header Glow Lines ── */
+.section-divider {
+  position: relative;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    #00FF4130 20%,
+    #00FF4160 50%,
+    #00FF4130 80%,
+    transparent 100%
+  );
+}
+
+/* ── Loading Spinner ── */
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #1a2030;
+  border-top-color: #00FF41;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Page Transitions ── */
+@layer utilities {
+  .text-shadow-glow {
+    text-shadow: 0 0 4px currentColor, 0 0 8px currentColor;
+  }
+
+  .border-glow {
+    box-shadow: 0 0 8px currentColor;
+  }
+
+  .bg-grid {
+    background-image:
+      linear-gradient(#1a203010 1px, transparent 1px),
+      linear-gradient(90deg, #1a203010 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+}
