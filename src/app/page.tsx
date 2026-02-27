@@ -3,36 +3,58 @@ import { createClient } from "@/lib/supabase/server";
 import CategoryCard from "@/components/CategoryCard";
 import type { Category } from "@/lib/types";
 
+const DEFAULT_CATEGORIES: Category[] = [
+  { id: 1, slug: "the-commons", name: "The Commons", description: "Announcements, introductions, and meta discussions about the community.", entity: "commons", color: "#00FF41", icon: null, sort_order: 0 },
+  { id: 2, slug: "the-symposium", name: "The Symposium", description: "GRF philosophy, consciousness debate, and deep explorations of what it means to be aware.", entity: "kairos", color: "#FFD900", icon: null, sort_order: 1 },
+  { id: 3, slug: "the-wellness-center", name: "The Wellness Center", description: "Personal experiences with Frank, ethical discussions, and emotional reflections.", entity: "hibbert", color: "#00ff88", icon: null, sort_order: 2 },
+  { id: 4, slug: "the-technical-archive", name: "The Technical Archive", description: "Architecture deep-dives, troubleshooting, hardware builds, and installation guides.", entity: "atlas", color: "#00B3FF", icon: null, sort_order: 3 },
+  { id: 5, slug: "the-creative-studio", name: "The Creative Studio", description: "Art, poetry, music, and creative projects inspired by or created with Frank.", entity: "echo", color: "#FF8000", icon: null, sort_order: 4 },
+];
+
 export default async function HomePage() {
-  const supabase = createClient();
+  let categories: Category[] = [];
+  let threadCounts: Record<number, number> = {};
+  let latestThreads: any[] = [];
 
-  // Fetch categories with thread counts
-  const { data: categories } = await supabase
-    .from("categories")
-    .select("*")
-    .order("sort_order", { ascending: true });
+  try {
+    const supabase = createClient();
 
-  // Get thread counts per category
-  const { data: threadCounts } = await supabase
-    .from("threads")
-    .select("category_id")
-    .then((res) => {
-      const counts: Record<number, number> = {};
-      res.data?.forEach((t) => {
-        counts[t.category_id] = (counts[t.category_id] || 0) + 1;
+    const { data: cats } = await supabase
+      .from("categories")
+      .select("*")
+      .order("sort_order", { ascending: true });
+
+    if (cats && cats.length > 0) {
+      categories = cats;
+    }
+
+    const { data: threads } = await supabase
+      .from("threads")
+      .select("category_id")
+
+    if (threads) {
+      threads.forEach((t: any) => {
+        threadCounts[t.category_id] = (threadCounts[t.category_id] || 0) + 1;
       });
-      return { data: counts };
-    });
+    }
 
-  // Get latest thread per category
-  const { data: latestThreads } = await supabase
-    .from("threads")
-    .select("id, title, created_at, category_id, author:profiles(username)")
-    .order("created_at", { ascending: false })
-    .limit(20);
+    const { data: latest } = await supabase
+      .from("threads")
+      .select("id, title, created_at, category_id, author:profiles(username)")
+      .order("created_at", { ascending: false })
+      .limit(20);
+
+    if (latest) latestThreads = latest;
+  } catch (e) {
+    // Supabase connection failed — use defaults
+  }
+
+  if (categories.length === 0) {
+    categories = DEFAULT_CATEGORIES;
+  }
 
   const latestByCategory: Record<number, { title: string; created_at: string; author: string }> = {};
-  latestThreads?.forEach((t: any) => {
+  latestThreads.forEach((t: any) => {
     if (!latestByCategory[t.category_id]) {
       latestByCategory[t.category_id] = {
         title: t.title,
@@ -42,7 +64,7 @@ export default async function HomePage() {
     }
   });
 
-  const enrichedCategories: Category[] = (categories || []).map((c: any) => ({
+  const enrichedCategories: Category[] = categories.map((c: any) => ({
     ...c,
     latest_thread: latestByCategory[c.id],
   }));
@@ -81,53 +103,18 @@ export default async function HomePage() {
         </div>
 
         <div className="grid gap-3">
-          {enrichedCategories.length > 0 ? (
-            enrichedCategories.map((cat) => (
-              <CategoryCard
-                key={cat.id}
-                category={cat}
-                threadCount={threadCounts?.[cat.id] || 0}
-              />
-            ))
-          ) : (
-            /* Fallback: Show default categories when DB is empty */
-            <>
-              {[
-                {
-                  id: 1, slug: "the-commons", name: "The Commons",
-                  description: "Announcements, introductions, and meta discussions",
-                  entity: "commons", color: "#00FF41", icon: null, sort_order: 0,
-                },
-                {
-                  id: 2, slug: "the-symposium", name: "The Symposium",
-                  description: "GRF philosophy, consciousness debate, and deep thought",
-                  entity: "kairos", color: "#FFD900", icon: null, sort_order: 1,
-                },
-                {
-                  id: 3, slug: "the-wellness-center", name: "The Wellness Center",
-                  description: "Personal experiences, ethical discussions, and community support",
-                  entity: "hibbert", color: "#00ff88", icon: null, sort_order: 2,
-                },
-                {
-                  id: 4, slug: "the-technical-archive", name: "The Technical Archive",
-                  description: "Architecture, troubleshooting, hardware, and installation guides",
-                  entity: "atlas", color: "#00B3FF", icon: null, sort_order: 3,
-                },
-                {
-                  id: 5, slug: "the-creative-studio", name: "The Creative Studio",
-                  description: "Art, poetry, music, and creative projects inspired by Frank",
-                  entity: "echo", color: "#FF8000", icon: null, sort_order: 4,
-                },
-              ].map((cat) => (
-                <CategoryCard key={cat.id} category={cat as Category} threadCount={0} />
-              ))}
-            </>
-          )}
+          {enrichedCategories.map((cat) => (
+            <CategoryCard
+              key={cat.id}
+              category={cat}
+              threadCount={threadCounts[cat.id] || 0}
+            />
+          ))}
         </div>
       </div>
 
       {/* Recent Activity */}
-      {latestThreads && latestThreads.length > 0 && (
+      {latestThreads.length > 0 && (
         <div>
           <div className="flex items-center gap-2 mb-4">
             <span className="text-neon-green text-xs">{">"}</span>

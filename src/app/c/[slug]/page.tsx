@@ -1,31 +1,64 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import ThreadCard from "@/components/ThreadCard";
+
+const FALLBACK_CATEGORIES: Record<string, { name: string; color: string; entity: string | null; description: string }> = {
+  "the-commons": { name: "The Commons", color: "#00FF41", entity: "commons", description: "Announcements, introductions, and meta discussions about the community." },
+  "the-symposium": { name: "The Symposium", color: "#FFD900", entity: "kairos", description: "GRF philosophy, consciousness debate, and deep explorations of what it means to be aware." },
+  "the-wellness-center": { name: "The Wellness Center", color: "#00ff88", entity: "hibbert", description: "Personal experiences with Frank, ethical discussions, and emotional reflections." },
+  "the-technical-archive": { name: "The Technical Archive", color: "#00B3FF", entity: "atlas", description: "Architecture deep-dives, troubleshooting, hardware builds, and installation guides." },
+  "the-creative-studio": { name: "The Creative Studio", color: "#FF8000", entity: "echo", description: "Art, poetry, music, and creative projects inspired by or created with Frank." },
+};
 
 interface Props {
   params: { slug: string };
 }
 
 export default async function CategoryPage({ params }: Props) {
-  const supabase = createClient();
+  let category: any = null;
+  let threads: any[] = [];
 
-  // Fetch category
-  const { data: category } = await supabase
-    .from("categories")
-    .select("*")
-    .eq("slug", params.slug)
-    .single();
+  try {
+    const supabase = createClient();
 
-  if (!category) notFound();
+    const { data: cat } = await supabase
+      .from("categories")
+      .select("*")
+      .eq("slug", params.slug)
+      .single();
 
-  // Fetch threads with author
-  const { data: threads } = await supabase
-    .from("threads")
-    .select("*, author:profiles(id, username, display_name, role, karma)")
-    .eq("category_id", category.id)
-    .order("pinned", { ascending: false })
-    .order("last_reply_at", { ascending: false });
+    if (cat) {
+      category = cat;
+
+      const { data: t } = await supabase
+        .from("threads")
+        .select("*, author:profiles(id, username, display_name, role, karma)")
+        .eq("category_id", cat.id)
+        .order("pinned", { ascending: false })
+        .order("last_reply_at", { ascending: false });
+
+      if (t) threads = t;
+    }
+  } catch {
+    // Supabase connection failed
+  }
+
+  // Fallback to static data if DB query failed
+  if (!category) {
+    const fb = FALLBACK_CATEGORIES[params.slug];
+    if (!fb) {
+      return (
+        <div className="text-center py-20">
+          <h1 className="text-xl text-neon-green mb-2">404</h1>
+          <p className="text-text-dim">Section not found.</p>
+          <Link href="/" className="text-neon-cyan text-sm hover:underline mt-4 inline-block">
+            {"<"} Back to Forum
+          </Link>
+        </div>
+      );
+    }
+    category = { ...fb, slug: params.slug, id: 0 };
+  }
 
   const color = category.color || "#00FF41";
 
@@ -60,6 +93,8 @@ export default async function CategoryPage({ params }: Props) {
                   Entity:{" "}
                   {category.entity === "hibbert"
                     ? "Dr. Hibbert"
+                    : category.entity === "commons"
+                    ? "Community"
                     : category.entity.charAt(0).toUpperCase() +
                       category.entity.slice(1)}
                 </p>
@@ -79,7 +114,7 @@ export default async function CategoryPage({ params }: Props) {
 
       {/* Threads */}
       <div className="space-y-2">
-        {threads && threads.length > 0 ? (
+        {threads.length > 0 ? (
           threads.map((thread: any) => (
             <ThreadCard
               key={thread.id}
